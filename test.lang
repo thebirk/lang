@@ -1,0 +1,19 @@
+//global variable 
+var a :int = 123;
+
+/*
+/*nested comments*/
+yay
+*/
+
+func test(a: uint, b: ^int): u32 {
+	var b: f32 = 1;
+	
+	if 1 {
+		var b: int = 321;
+	} else if 1 {
+		
+	} else {
+		
+	}
+}
