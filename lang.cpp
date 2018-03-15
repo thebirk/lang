@@ -76,7 +76,21 @@ void* xrealloc(void *ptr, size_t size)
 	}
 	return ptr;
 }
-	
+
+#define ARENA_SIZE 1024*1024*64
+static void* MemoryArena = xmalloc(ARENA_SIZE);
+static size_t MemoryArenaOffset = 0;
+
+#define ArenaPushArray(_el, _size) _ArenaPush(sizeof(_el)* (_size))
+#define ArenaPush(_el) _ArenaPush(sizeof(_el))
+void* _ArenaPush(size_t bytes)
+{
+	void *ptr = (uint8_t*)MemoryArena+MemoryArenaOffset;
+	MemoryArenaOffset += bytes;
+	assert(MemoryArenaOffset <= ARENA_SIZE);
+	return ptr;
+}
+
 template<typename T>
 struct Array
 {
@@ -114,6 +128,50 @@ char* copy_fixed_string(char *str, int length)
 	new_string[length] = 0;
 	return new_string;
 }
+
+struct InternString
+{
+	char *str;
+	int  len;
+};
+
+static Array<InternString> interns = make_array<InternString>();
+
+char* InternStringRange(char *start, char *end)
+{
+	int len = end-start;
+	InternString str;
+	for_array(&interns, str) {
+		if(str.len == len && strncmp(str.str, start, len) == 0) {
+			return str.str;
+		}
+	}
+	
+	//char *result = (char*) xmalloc(len+1);
+	char *result = (char*) ArenaPushArray(char, len+1);
+	memcpy(result, start, len);
+	result[len] = 0;
+	array_append(&interns, {result, len});
+	return result;
+}
+
+char* InternStringLength(char *start, int len)
+{
+	InternString str;
+	for_array(&interns, str) {
+		if(str.len == len && strncmp(str.str, start, len) == 0) {
+			return str.str;
+		}
+	}
+	
+	//char *result = (char*) xmalloc(len+1);
+	char *result = (char*) ArenaPushArray(char, len+1);
+	memcpy(result, start, len);
+	result[len] = 0;
+	array_append(&interns, {result, len});
+	return result;
+}
+
 
 enum 
 {
@@ -228,6 +286,9 @@ void AddToken(Lexer *lexer, Token t)
 	lexer->tokens[lexer->tokens_count-1] = t;
 }
 
+// NOTE: Allocating a Token for every token is slow
+//       Create a smart function that only does a few
+//       that way we dont need excessive amounts of mem
 void Lex(Lexer *lexer)
 {
 	char *ptr = lexer->data;
@@ -364,7 +425,7 @@ void Lex(Lexer *lexer)
 		if(t->kind != TOKEN_IDENT) continue;
 		
 		if(0) {}
-#define KEYWORD(_kind, _str) else if(strncmp(t->lexeme, _str, t->length) == 0) { t->kind = _kind; continue; }
+#define KEYWORD(_kind, _str) else if((t->length == strlen(_str)) && (strncmp(t->lexeme, _str, t->length) == 0)) { t->kind = _kind; continue; }
 		KEYWORD(TOKEN_IF, "if")
 		KEYWORD(TOKEN_DO, "do")
 		KEYWORD(TOKEN_ELSE, "else")
@@ -519,7 +580,8 @@ struct Node
 
 Node* NewNode(int kind)
 {
-	Node *n = (Node*)xmalloc(sizeof(Node));
+	//Node *n = (Node*)xmalloc(sizeof(Node));
+	Node *n = (Node*) ArenaPush(Node);
 	
 	n->kind = kind;
 	
@@ -838,12 +900,12 @@ Type* ParseType(Parser *parser)
 	token = parser->current_token;
 	Expect(parser, TOKEN_IDENT);
 	
-	char *name = copy_fixed_string(token.lexeme, token.length);
+	char *name = InternStringLength(token.lexeme, token.length);
 	Type *t = BasicTypeFromName(name);
 	if(!t) {
 		t = NewType();
 		t->kind = TYPE_NAMED;
-		t->name = copy_fixed_string(token.lexeme, token.length);
+		t->name = InternStringLength(token.lexeme, token.length);
 	}
 	if(type) {
 		type->base_type = t;
