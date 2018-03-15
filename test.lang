@@ -9,7 +9,12 @@ yay
 func test(a: uint, b: ^int): u32 {
 	var b: f32 = 1;
 	
-	var d: uint = 321;
+	// Type inference (not supported as of now)
+	// var c = 12+4*3;
+	
+	var d: uint = 321+2;
+	
+	print_int(d);
 	
 	if 1 {
 		var b: int = 321;
