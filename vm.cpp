@@ -82,7 +82,7 @@ void GenBytecode(VirtualMachine *vm, Module *m)
 	// global offsets
 	
 	Function *f;
-	for_array(&m->global_scope->functions, f) {
+	for_array_ref(&m->global_scope->functions, f) {
 		GenFunction(vm, m, f);
 	}
 }

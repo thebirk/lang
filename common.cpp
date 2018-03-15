@@ -19,8 +19,9 @@ void* xrealloc(void *ptr, size_t size)
 }
 
 //////// Array implementation
-#define for_array(_array, _var) for(int it = 0; (_var) = &((_array)->data[it]),it < (_array)->len; it++)
-
+#define for_array_ref(_array, _var) for(int it = 0; (_var) = &((_array)->data[it]),it < (_array)->len; it++)
+#define for_array(_array, _var) for(int it = 0; (_var) = (_array)->data[it],it < (_array)->len; it++)
+	
 template<typename T>
 struct Array
 {
@@ -80,7 +81,7 @@ char* InternStringRange(char *start, char *end)
 {
 	int len = end-start;
 	InternString *str;
-	for_array(&interns, str) {
+	for_array_ref(&interns, str) {
 		if(str->len == len && strncmp(str->str, start, len) == 0) {
 			return str->str;
 		}
@@ -97,7 +98,7 @@ char* InternStringRange(char *start, char *end)
 char* InternStringLength(char *start, int len)
 {
 	InternString *str;
-	for_array(&interns, str) {
+	for_array_ref(&interns, str) {
 		if(str->len == len && strncmp(str->str, start, len) == 0) {
 			return str->str;
 		}

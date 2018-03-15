@@ -35,7 +35,7 @@ void AddDeclarationToScope(Scope *scope, Node *func)
 		
 	}
 	
-	Node *f;
+	Node **f;
 	for_array(&scope->stmts, f) {
 		
 	}
@@ -45,7 +45,7 @@ bool CheckBlock(Parser *parser, Node *parent, Node *block)
 {
 	assert(block->kind == NODE_BLOCK);
 	
-	Node *stmt;
+	Node **stmt;
 	for_array(&block->block.stmts, stmt) {
 		// CheckStmt? With out without parent blocks?
 	}
@@ -69,7 +69,7 @@ bool CheckProgram(Checker *checker)
 	Scope *global_scope = checker->global_scope;
 	Parser *parser = checker->parser;
 	
-	Node *n;
+	Node **n;
 	for_array(&parser->top_level, n) {
 		if(n->kind == NODE_FUNC) {
 			AddDeclarationToScope(global_scope, n);
@@ -82,3 +82,8 @@ bool CheckProgram(Checker *checker)
 	
 	return true;
 }
+
+/*	Checker _checker = {0};
+	Checker *checker = &_checker;
+	checker->parser = parser;
+	printf("CheckProgram: %s\n", CheckProgram(checker) ? "true" : "false");*/

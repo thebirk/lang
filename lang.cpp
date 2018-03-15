@@ -60,6 +60,11 @@ TODO:
 - Complete vm
 - Generate bytecodes from ir
 
+REFACTORING:
+
+- Make Tokens use interned strings instead of ptr+len
+- 
+
 */
 
 enum 
@@ -681,6 +686,7 @@ Node* expr5(Parser *parser)
 	while(t.kind == TOKEN_ASTERISK ||
 		  t.kind == TOKEN_SLASH ||
 		  t.kind == TOKEN_BAND) {
+		// Does not work with multichar ops like '==', '<=', etc.
 		char op = TokenKindToString(t.kind)[0];
 		NextToken(parser);
 		
@@ -702,6 +708,7 @@ Node* expr4(Parser *parser)
 	while(t.kind == TOKEN_PLUS ||
 		  t.kind == TOKEN_MINUS ||
 		  t.kind == TOKEN_BOR) {
+		// Does not work with multichar ops like '==', '<=', etc.
 		char op = TokenKindToString(t.kind)[0];
 		NextToken(parser);
 		
@@ -964,8 +971,6 @@ void LexerTest()
 	}
 }
 	
-#include "checker.cpp"
-	
 int main(int argc, char **argv)
 {
 	printf("\nToy Compiler\n\n");
@@ -976,10 +981,7 @@ int main(int argc, char **argv)
 	InitParser(parser, "test.lang");
 	Parse(parser);
 	
-	Checker _checker = {0};
-	Checker *checker = &_checker;
-	checker->parser = parser;
-	printf("CheckProgram: %s\n", CheckProgram(checker) ? "true" : "false");
+
 	
 	return 0;
 }
