@@ -19,7 +19,7 @@ void* xrealloc(void *ptr, size_t size)
 }
 
 //////// Array implementation
-#define for_array(_array, _var) for(int it = 0; (_var) = (_array)->data[it],it < (_array)->len; it++)
+#define for_array(_array, _var) for(int it = 0; (_var) = &((_array)->data[it]),it < (_array)->len; it++)
 
 template<typename T>
 struct Array
@@ -56,8 +56,8 @@ void array_append(Array<T> *array, T el)
 static void* MemoryArena = xmalloc(ARENA_SIZE);
 static size_t MemoryArenaOffset = 0;
 
-#define ArenaPushArray(_el, _size) _ArenaPush(sizeof(_el)* (_size))
-#define ArenaPush(_el) _ArenaPush(sizeof(_el))
+#define ArenaPushArray(_el, _size) (_el*) _ArenaPush(sizeof(_el)* (_size))
+#define ArenaPush(_el) (_el*) _ArenaPush(sizeof(_el))
 void* _ArenaPush(size_t bytes)
 {
 	void *ptr = (uint8_t*)MemoryArena+MemoryArenaOffset;
@@ -79,10 +79,10 @@ static Array<InternString> interns = make_array<InternString>();
 char* InternStringRange(char *start, char *end)
 {
 	int len = end-start;
-	InternString str;
+	InternString *str;
 	for_array(&interns, str) {
-		if(str.len == len && strncmp(str.str, start, len) == 0) {
-			return str.str;
+		if(str->len == len && strncmp(str->str, start, len) == 0) {
+			return str->str;
 		}
 	}
 	
@@ -96,10 +96,10 @@ char* InternStringRange(char *start, char *end)
 
 char* InternStringLength(char *start, int len)
 {
-	InternString str;
+	InternString *str;
 	for_array(&interns, str) {
-		if(str.len == len && strncmp(str.str, start, len) == 0) {
-			return str.str;
+		if(str->len == len && strncmp(str->str, start, len) == 0) {
+			return str->str;
 		}
 	}
 	
