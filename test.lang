@@ -12,7 +12,9 @@ func test(a: uint, b: ^int): u32 {
 	// Type inference (not supported as of now)
 	// var c = 12+4*3;
 	
-	var d: uint = 321+2;
+	var d: int = 321+2;
+	
+	var arr: []int;
 	
 	print_int(d);
 	

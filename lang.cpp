@@ -55,6 +55,11 @@ or semantics/type checking first?
 
 TODO:
 
+- Var declaration:
+  - Parse expr for array size, differentiate between sized and non-sized array
+  - Allow for declaration without expr: 'var a: int'
+- String literals
+- Char literals
 - Generate ir for ast
 - Do semantics checking
 - Complete vm
@@ -63,7 +68,7 @@ TODO:
 REFACTORING:
 
 - Make Tokens use interned strings instead of ptr+len
-- 
+- Have a seperate memory arena for strings, be more cache friendly
 
 */
 
@@ -158,7 +163,12 @@ bool IsValidIdentifier(char c)
 
 bool IsWhitespace(char c)
 {
-	return (c == ' ') || (c == '\t') || (c == '\r');
+	return (c == ' ') || (c == '\t');
+}
+
+bool IsNonAdvancingWhitespace(char c)
+{
+	return (c == '\r');
 }
 
 bool IsNewline(char c)
@@ -195,6 +205,11 @@ void Lex(Lexer *lexer)
 			continue;
 		}
 		
+		if(IsNonAdvancingWhitespace(*ptr)) {
+			ptr++;
+			continue;
+		}
+		
 		if(IsWhitespace(*ptr)) {
 			ptr++;
 			lexer->col++;
@@ -219,6 +234,10 @@ void Lex(Lexer *lexer)
 				if(IsNewline(*ptr)) {
 					lexer->line++;
 					lexer->col = 1;
+					ptr++;
+					continue;
+				}
+				if(IsNonAdvancingWhitespace(*ptr)) {
 					ptr++;
 					continue;
 				}

@@ -2,10 +2,10 @@ struct Module;
 
 struct Variable
 {
-	char *name;
-	Type *type;
-	int offset;
-	bool defined;
+	char *name;   // Interned name
+	Type *type;   // 
+	int offset;   // ?
+	bool defined; // Gets set to true when we have walked the declaration
 };
 
 struct Block
@@ -44,7 +44,8 @@ enum
 {
 	VALUE_CONSTANT,
 	VALUE_VARIABLE,
-	VALUE_BINARY_OP,
+	// 
+	VALUE_BINOP,
 };
 
 struct Value
