@@ -63,12 +63,12 @@ TODO:
 - Generate ir for ast
 - Do semantics checking
 - Complete vm
-- Generate bytecodes from ir
+- Generate bytecode from ir
 
 REFACTORING:
 
 - Make Tokens use interned strings instead of ptr+len
-- Have a seperate memory arena for strings, be more cache friendly
+- Have a separate memory arena for interned strings, be more cache friendly
 
 */
 

@@ -14,7 +14,7 @@ func test(a: uint, b: ^int): u32 {
 	
 	var d: int = 321+2;
 	
-	var arr: []int;
+	// var arr: []int;
 	
 	print_int(d);
 	
